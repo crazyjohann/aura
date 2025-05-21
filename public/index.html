@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aura Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f0f0f8;
+      max-width: 600px;
+      margin: auto;
+    }
+    .question {
+      margin-bottom: 1.2rem;
+    }
+    .result {
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    input[type=range] {
+      width: 100%;
+    }
+    img {
+      max-width: 300px;
+      margin-top: 1rem;
+      border-radius: 10px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <h1>How Much Aura Do You Have?</h1>
+  <form id="aura-form">
+    <div class="question"><label>1. How confident do you feel most days?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>2. How often do people say nice things about you?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>3. How well do you handle stress?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>4. How often do you do well in school or activities?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>5. How organized are you?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>6. How good do you think your style is?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>7. How friendly are you with others?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>8. How focused are you when you need to be?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>9. How open are you to trying new things?</label><input type="range" min="0" max="10" value="5" /></div>
+    <div class="question"><label>10. How proud are you of yourself right now?</label><input type="range" min="0" max="10" value="5" /></div>
+    <button type="submit">Find Out!</button>
+  </form>
+
+  <div class="result" id="result" style="display:none;"></div>
+
+  <script>
+    const form = document.getElementById('aura-form');
+    const resultDiv = document.getElementById('result');
+
+    const auraLevels = [
+      { label: "None", min: 0n, max: 50n, desc: "No aura detected. Like a rock.", gif: "https://media.giphy.com/media/l0MYB8Ory7Hqefo9a/giphy.gif" },
+      { label: "Faint", min: 51n, max: 500n, desc: "A weak flicker. You’re just getting started.", gif: "https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" },
+      { label: "Glow", min: 501n, max: 5000n, desc: "Your aura is beginning to shine. Others may notice.", gif: "https://media.giphy.com/media/3ohc1dOsyYcVKlhfHa/giphy.gif" },
+      { label: "Luminous", min: 5001n, max: 50000n, desc: "Bright and visible. You radiate positive energy.", gif: "https://media.giphy.com/media/xT0xem2xZpB6N7cXIs/giphy.gif" },
+      { label: "Radiant", min: 50001n, max: 500000n, desc: "Strong aura presence. People feel it around you.", gif: "https://media.giphy.com/media/3o7TKx3TgXbEpVvB4I/giphy.gif" },
+      { label: "Supercharged", min: 500001n, max: 5000000n, desc: "You're overflowing with power. Charged up.", gif: "https://media.giphy.com/media/3oEduQAsYcJKQH2XsI/giphy.gif" },
+      { label: "Ascended", min: 5000001n, max: 50000000n, desc: "You’ve evolved beyond most. Aura mastery.", gif: "https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif" },
+      { label: "Divine", min: 50000001n, max: 999999999n, desc: "Your aura defies nature. Godlike presence.", gif: "https://media.giphy.com/media/xT0GqeSlGSRQutX7a0/giphy.gif" },
+      { label: "Ethereal", min: BigInt("1000000000"), max: BigInt("9" + "0".repeat(99)), desc: "Unmeasurable by mortal standards. Transcendent.", gif: "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif" },
+      { label: "Googol (∞)", min: BigInt("1" + "0".repeat(100)), max: BigInt("1" + "0".repeat(200)), desc: "Beyond limits. Your aura warps reality itself.", gif: "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" }
+    ];
+
+    function scaleScore(score) {
+      if(score === 0) return 0n;
+      let exponent = BigInt(score);
+      if (exponent > 100n) exponent = 100n;
+      let auraStr = "1" + "0".repeat(Number(exponent));
+      return BigInt(auraStr);
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const inputs = form.querySelectorAll('input[type=range]');
+      let total = 0;
+      inputs.forEach(input => total += parseInt(input.value));
+
+      let auraScore = scaleScore(total);
+      let aura = auraLevels.find(level => auraScore >= level.min && auraScore <= level.max);
+      if (!aura) aura = auraLevels[auraLevels.length - 1];
+
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <h2>Your Aura Level: ${aura.label}</h2>
+        <p><strong>Aura Score:</strong> ${auraScore.toString()}</p>
+        <p>${aura.desc}</p>
+        <img src="${aura.gif}" alt="${aura.label} aura gif" />
+      `;
+    });
+  </script>
+</body>
+</html>
